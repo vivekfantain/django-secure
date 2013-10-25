@@ -40,12 +40,12 @@ class SecurityMiddleware(object):
     def process_response(self, request, response):
         if (self.frame_deny and
                 not getattr(response, "_frame_deny_exempt", False) and
-                not 'x-frame-options' in response):
+                not response.has_header('x-frame-options')):
             response["x-frame-options"] = "DENY"
 
         if (self.sts_seconds and
                 request.is_secure() and
-                not 'strict-transport-security' in response):
+                not response.has_header('strict-transport-security')):
             sts_header = ("max-age=%s" % self.sts_seconds)
 
             if self.sts_include_subdomains:
@@ -54,10 +54,10 @@ class SecurityMiddleware(object):
             response["strict-transport-security"] = sts_header
 
         if (self.content_type_nosniff and
-                not 'x-content-type-options' in response):
+                not response.has_header('x-content-type-options')):
             response["x-content-type-options"] = "nosniff"
 
-        if self.xss_filter and not 'x-xss-protection' in response:
+        if self.xss_filter and not response.has_header('x-xss-protection'):
             response["x-xss-protection"] = "1; mode=block"
 
         return response
